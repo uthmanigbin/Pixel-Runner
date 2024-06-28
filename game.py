@@ -1,4 +1,5 @@
 import pygame
+import requests
 from sys import exit
 from random import randint, choice
 
@@ -119,6 +120,52 @@ def player_animation():
 		if player_index >= len(player_walk):player_index = 0
 		player_surf = player_walk[int(player_index)]
 
+class TextInput:
+    def __init__(self, font, base_text='', max_length=15):
+        self.font = font
+        self.text = base_text
+        self.max_length = max_length
+        self.input_active = True
+        self.background_color = (255, 255, 255)
+        self.text_color = (0, 0, 0)
+        self.rect = pygame.Rect(0, 0, 300, 50)
+
+    def add_char(self, char):
+        if len(self.text) < self.max_length:
+            self.text += char
+
+    def remove_char(self):
+        self.text = self.text[:-1]
+
+    def handle_event(self, event):
+        if self.input_active:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    self.remove_char()
+                elif event.key == pygame.K_RETURN:
+                    self.input_active = False
+                    send_score(self.text, score)
+                else:
+                    if len(self.text) < self.max_length:
+                        self.add_char(event.unicode)
+
+    def draw(self, surface, position):
+        self.rect.center = position
+        pygame.draw.rect(surface, self.background_color, self.rect)
+        text_surface = self.font.render(self.text, True, self.text_color)
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        surface.blit(text_surface, text_rect)
+        return text_rect
+
+def send_score(name, score):
+    url = 'http://localhost:5000/submit_score'
+    data = {'name': name, 'score': score}
+    try:
+        response = requests.post(url, json=data)
+        print(response.json())  
+    except requests.exceptions.RequestException as e:
+        print(e)
+        
 pygame.init()
 screen = pygame.display.set_mode((800,400))
 pygame.display.set_caption('Runner')
@@ -190,12 +237,16 @@ pygame.time.set_timer(snail_animation_timer,500)
 fly_animation_timer = pygame.USEREVENT + 3
 pygame.time.set_timer(fly_animation_timer,200)
 
+#Text box
+name_input = TextInput(test_font)
+
 while True:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			pygame.quit()
 			exit()
-		
+		if not game_active:
+			name_input.handle_event(event)
 		if game_active:
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				if player_rect.collidepoint(event.pos) and player_rect.bottom >= 300: 
@@ -266,10 +317,16 @@ while True:
 		obstacle_rect_list.clear()
 		player_rect.midbottom = (80,300)
 		player_gravity = 0
-
-		score_message = test_font.render(f'Your score: {score}',False,(111,196,169))
-		score_message_rect = score_message.get_rect(center = (400,330))
-		screen.blit(game_name,game_name_rect)
+		if score > 0:
+			score_message = test_font.render(f'Score: {score}',False,(111,196,169))
+			score_message_rect = score_message.get_rect(center = (400,50))
+			screen.blit(game_name,game_name_rect)
+	
+			name_message = test_font.render('What is your name',False,(111,196,169))
+			name_message_rect = name_message.get_rect(center = (400,320))
+			screen.blit(name_message, name_message_rect)
+	
+			name_input.draw(screen, (400, 370))
 
 		if score == 0: screen.blit(game_message,game_message_rect)
 		else: screen.blit(score_message,score_message_rect)

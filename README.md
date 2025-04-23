@@ -4,7 +4,7 @@ Dive into Pixel Runner, a visually stunning evolution of the beloved Chrome offl
 
 ## Important Note
 
-Pixel Runner is currently not live. The game’s database is not yet hosted on the internet, so multiplayer features and online leaderboard access are not available at this time. The game can be played locally with local leaderboard features.
+Pixel Runner is currently not live. The game’s database is no longer being hosted on the internet, The game can be played locally with local leaderboard features.
 
 ## Getting Started
 
@@ -39,7 +39,5 @@ The objective of Pixel Runner is to achieve the highest possible score and secur
 ## Team Members
 
 - **Olabanji Uthman Igbin**
-- **Yatin Thakkar**
-- **Pavil Valned**
 
 Enjoy Pixel Runner and keep aiming for that high score!
